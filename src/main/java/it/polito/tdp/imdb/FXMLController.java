@@ -5,8 +5,10 @@
 package it.polito.tdp.imdb;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnCercaAffini; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxRegista"
-    private ComboBox<?> boxRegista; // Value injected by FXMLLoader
+    private ComboBox<Director> boxRegista; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtAttoriCondivisi"
     private TextField txtAttoriCondivisi; // Value injected by FXMLLoader
@@ -48,11 +50,54 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	// recupero valori immessi dall'utente con i relativi controlli
+    	
+    	// controlli errore comboBox
+    	Integer anno = this.boxAnno.getValue();
+    	if (boxAnno==null) {
+    	    this.txtResult.setText("Please select a year");
+    	    return;
+    	}
+    	
+    	// creo il grafo
+    	this.model.creaGrafo(anno);
+    	
 
+    	this.txtResult.setText("Grafo creato con " + this.model.getNVertici() + " vertici e " + this.model.getNArchi()+ " archi\n");
+
+    	
+    	//popolare la combo box
+    	this.boxRegista.getItems().clear();
+    	this.boxRegista.getItems().addAll(model.getVertici());
+    	
+    	//abilita i vari controlli della gui
+    	this.boxRegista.setDisable(false);
+    	this.btnAdiacenti.setDisable(false);
+    	this.btnCercaAffini.setDisable(false);
+    	this.txtAttoriCondivisi.clear();
     }
 
     @FXML
     void doRegistiAdiacenti(ActionEvent event) {
+    	
+    	// recupero valori immessi dall'utente con i relativi controlli
+    	
+    	// controlli errore comboBox
+    	Director director = this.boxRegista.getValue();
+    	if (boxRegista==null) {
+    	    this.txtResult.setText("Please select a director");
+    	    return;
+    	}
+    	
+    	this.txtResult.setText("Registi ADIACENTI a: " + director +"\n");
+    	
+    	List<Director> registi = model.getAdiacenze(director);
+    	for (Director d : registi) {
+    		this.txtResult.appendText(d + " - # attori condivisi: "+ model.getWeightGivenTwoVertexes(director, d) +"\n");
+        	
+    	}
+    	
 
     }
 
@@ -70,6 +115,15 @@ public class FXMLController {
         assert boxRegista != null : "fx:id=\"boxRegista\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtAttoriCondivisi != null : "fx:id=\"txtAttoriCondivisi\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
+    	this.boxRegista.setDisable(true);
+    	this.btnAdiacenti.setDisable(true);
+    	this.btnCercaAffini.setDisable(true);
+    	this.txtResult.clear();
+        
+    	//popolare la combo box
+    	this.boxAnno.getItems().clear();
+    	for (int i=2004; i<2007; i++)
+    		this.boxAnno.getItems().add(i);
 
     }
     
